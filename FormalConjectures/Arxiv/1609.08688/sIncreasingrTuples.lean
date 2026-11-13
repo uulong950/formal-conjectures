@@ -212,11 +212,118 @@ theorem maximalLength_le (n : ℕ) : F n ≤ n ^ 2 := by
       | succ n =>
         exact (hn (Nat.succ_le_succ (Nat.succ_le_succ (Nat.zero_le _)))).elim
 
+private def sqTriple (m t : ℕ) : Fin 3 → ℕ :=
+  let i := (t / m) / m
+  let j := (t / m) % m
+  let k := t % m
+  ![m * i + j + 1, m * i + k + 1, m * j + k + 1]
+
+private lemma sqTriple_lt₂ {m x y : ℕ} (hm : 0 < m) (hxy : x < y) :
+    sqTriple m x <₂ sqTriple m y := by
+  set qx := x / m
+  set qy := y / m
+  set ix := qx / m
+  set jx := qx % m
+  set kx := x % m
+  set iy := qy / m
+  set jy := qy % m
+  set ky := y % m
+  have h0x : sqTriple m x 0 = m * ix + jx + 1 := rfl
+  have h1x : sqTriple m x 1 = m * ix + kx + 1 := rfl
+  have h2x : sqTriple m x 2 = m * jx + kx + 1 := rfl
+  have h0y : sqTriple m y 0 = m * iy + jy + 1 := rfl
+  have h1y : sqTriple m y 1 = m * iy + ky + 1 := rfl
+  have h2y : sqTriple m y 2 = m * jy + ky + 1 := rfl
+  have hjx : jx < m := Nat.mod_lt qx hm
+  have hkx : kx < m := Nat.mod_lt x hm
+  have hjy : jy < m := Nat.mod_lt qy hm
+  have hky : ky < m := Nat.mod_lt y hm
+  have hqx_eq : m * ix + jx = qx := Nat.div_add_mod qx m
+  have hqy_eq : m * iy + jy = qy := Nat.div_add_mod qy m
+  have hx_eq : m * qx + kx = x := Nat.div_add_mod x m
+  have hy_eq : m * qy + ky = y := Nat.div_add_mod y m
+  have hq_le : qx ≤ qy := Nat.div_le_div_right (le_of_lt hxy)
+  have hi_le : ix ≤ iy := Nat.div_le_div_right hq_le
+  rcases lt_or_eq_of_le hi_le with hi_lt | hi_eq
+  · have hm_ilt : m * ix + m ≤ m * iy := by
+      calc m * ix + m = m * (ix + 1) := by ring
+        _ ≤ m * iy := Nat.mul_le_mul_left m hi_lt
+    refine ⟨0, 1, by decide, ?_, ?_⟩
+    · rw [h0x, h0y]; omega
+    · rw [h1x, h1y]; omega
+  · have hm_ieq : m * ix = m * iy := by rw [hi_eq]
+    rcases lt_or_eq_of_le hq_le with hq_lt | hq_eq
+    · have hj_lt : jx < jy := by omega
+      have hm_jlt : m * jx + m ≤ m * jy := by
+        calc m * jx + m = m * (jx + 1) := by ring
+          _ ≤ m * jy := Nat.mul_le_mul_left m hj_lt
+      refine ⟨0, 2, by decide, ?_, ?_⟩
+      · rw [h0x, h0y]; omega
+      · rw [h2x, h2y]; omega
+    · have hm_qeq : m * qx = m * qy := by rw [hq_eq]
+      have hj_eq : jx = jy := by omega
+      have hm_jeq : m * jx = m * jy := by rw [hj_eq]
+      have hk_lt : kx < ky := by omega
+      refine ⟨1, 2, by decide, ?_, ?_⟩
+      · rw [h1x, h1y]; omega
+      · rw [h2x, h2y]; omega
+
 /-- Moreover, whenever $n$ is a perfect square we have $F(n) \geq n^{3/2}$. -/
 @[category research solved, AMS 5]
 theorem maximalLength_ge_of_isSquare {n : ℕ} (h : IsSquare n) :
     n.sqrt ^ 3 ≤ F n := by
-  sorry
+  rcases h with ⟨m, rfl⟩
+  rw [Nat.sqrt_eq]
+  rcases m with _ | m
+  · simp
+  · rcases m with _ | m
+    · simp [maximalLength_one]
+    · set M := m + 2
+      have hM : 2 ≤ M := by omega
+      have hM_pos : 0 < M := by omega
+      have hMM : 2 ≤ M * M := by nlinarith
+      rw [maximalLength]
+      refine le_csSup ?_ ?_
+      · refine ⟨(M * M) ^ 2, ?_⟩
+        rintro _ ⟨s, hs_range, hs_inc, rfl⟩
+        by_contra hle
+        have hs_length : (M * M) ^ 2 < s.length := Nat.lt_of_not_ge hle
+        obtain ⟨i, j, hij, h0, h1⟩ :=
+          exists_pair_of_mem_Icc hMM hs_range hs_length
+        have hp : s.Pairwise lt₂ := hs_inc
+        rcases lt_or_gt_of_ne hij with hij | hji
+        · exact (not_lt₂_of_exists 0 1 zero_ne_one h0.ge h1.ge)
+            (List.pairwise_iff_get.1 hp i j hij)
+        · exact (not_lt₂_of_exists 0 1 zero_ne_one h0.le h1.le)
+            (List.pairwise_iff_get.1 hp j i hji)
+      · refine ⟨(List.range (M ^ 3)).map (sqTriple M), ?_, ?_, by simp⟩
+        · intro a ha
+          rcases List.mem_map.mp ha with ⟨t, ht, rfl⟩
+          have ht_lt : t < M ^ 3 := List.mem_range.mp ht
+          rintro _ ⟨idx, rfl⟩
+          set q := t / M
+          set i := q / M
+          set j := q % M
+          set k := t % M
+          have hj : j < M := Nat.mod_lt q hM_pos
+          have hk : k < M := Nat.mod_lt t hM_pos
+          have hq_lt : q < M * M :=
+            Nat.div_lt_of_lt_mul (by linarith [ht_lt, show M ^ 3 = M * (M * M) by ring])
+          have hi : i < M := Nat.div_lt_of_lt_mul hq_lt
+          have him : M * i + M ≤ M * M := by
+            calc M * i + M = M * (i + 1) := by ring
+              _ ≤ M * M := Nat.mul_le_mul_left M hi
+          have hjm : M * j + M ≤ M * M := by
+            calc M * j + M = M * (j + 1) := by ring
+              _ ≤ M * M := Nat.mul_le_mul_left M hj
+          rw [Set.mem_Icc]
+          fin_cases idx
+          · change 1 ≤ M * i + j + 1 ∧ M * i + j + 1 ≤ M * M; omega
+          · change 1 ≤ M * i + k + 1 ∧ M * i + k + 1 ≤ M * M; omega
+          · change 1 ≤ M * j + k + 1 ∧ M * j + k + 1 ≤ M * M; omega
+        · rw [IsIncreasing₂, List.pairwise_map]
+          exact List.Pairwise.imp (sqTriple_lt₂ hM_pos) List.pairwise_lt_range
+
 
 /-- Two triples $t_1$ and $t_2$ are $2$-comparable if one of them is $2$-less
 than the other. -/
@@ -273,12 +380,186 @@ theorem isIncreasing₂_sequenceProduct_example :
   unfold IsIncreasing₂ sequenceProduct tripleProduct lt₂
   decide
 
+private lemma length_le_of_isIncreasing₂ {n : ℕ} {s : List (Fin 3 → ℕ)}
+    (hs₁ : ∀ a ∈ s, Set.range a ⊆ Set.Icc 1 n) (hs₂ : IsIncreasing₂ s) :
+    s.length ≤ (max n 2) ^ 2 := by
+  by_contra hle
+  have hs_len : (max n 2) ^ 2 < s.length := Nat.lt_of_not_ge hle
+  have hs₁' : ∀ a ∈ s, Set.range a ⊆ Set.Icc 1 (max n 2) := fun a ha =>
+    (hs₁ a ha).trans (Set.Icc_subset_Icc_right (le_max_left n 2))
+  obtain ⟨i, j, hij, h0, h1⟩ := exists_pair_of_mem_Icc (le_max_right n 2) hs₁' hs_len
+  rcases lt_or_gt_of_ne hij with hij | hji
+  · exact (not_lt₂_of_exists 0 1 zero_ne_one h0.ge h1.ge)
+      (List.pairwise_iff_get.1 hs₂ i j hij)
+  · exact (not_lt₂_of_exists 0 1 zero_ne_one h0.le h1.le)
+      (List.pairwise_iff_get.1 hs₂ j i hji)
+
+private lemma bddAbove_maximalLength (n : ℕ) :
+    BddAbove { List.length s | (s) (_ : ∀ a ∈ s, Set.range a ⊆ Set.Icc 1 n) (_ : IsIncreasing₂ s) } := by
+  refine ⟨(max n 2) ^ 2, ?_⟩
+  rintro _ ⟨s, hs₁, hs₂, rfl⟩
+  exact length_le_of_isIncreasing₂ hs₁ hs₂
+
+private lemma exists_list_maximalLength (n : ℕ) :
+    ∃ s : List (Fin 3 → ℕ),
+      (∀ a ∈ s, Set.range a ⊆ Set.Icc 1 n) ∧ IsIncreasing₂ s ∧ s.length = F n := by
+  have hne : { List.length s | (s) (_ : ∀ a ∈ s, Set.range a ⊆ Set.Icc 1 n) (_ : IsIncreasing₂ s) }.Nonempty :=
+    ⟨0, [], by simp, isIncreasing₂_nil, rfl⟩
+  rcases Nat.sSup_mem hne (bddAbove_maximalLength n) with ⟨s, hs₁, hs₂, hlen⟩
+  exact ⟨s, hs₁, hs₂, hlen⟩
+
+private lemma maximalLength_mono {m n : ℕ} (hmn : m ≤ n) : F m ≤ F n := by
+  obtain ⟨s, hs₁, hs₂, hlen⟩ := exists_list_maximalLength m
+  rw [← hlen, maximalLength]
+  refine le_csSup (bddAbove_maximalLength n) ⟨s, ?_, hs₂, rfl⟩
+  intro a ha
+  exact (hs₁ a ha).trans (Set.Icc_subset_Icc_right hmn)
+
+private def prodTriple (n : ℕ) (a b : Fin 3 → ℕ) : Fin 3 → ℕ :=
+  fun i => n * (a i - 1) + b i
+
+private lemma prodTriple_mem_Icc {m n : ℕ} {a b : Fin 3 → ℕ}
+    (ha : Set.range a ⊆ Set.Icc 1 m) (hb : Set.range b ⊆ Set.Icc 1 n) :
+    Set.range (prodTriple n a b) ⊆ Set.Icc 1 (m * n) := by
+  rintro _ ⟨i, rfl⟩
+  have hai := Set.mem_Icc.mp (ha ⟨i, rfl⟩)
+  have hbi := Set.mem_Icc.mp (hb ⟨i, rfl⟩)
+  rw [Set.mem_Icc]
+  refine ⟨by dsimp [prodTriple]; omega, ?_⟩
+  dsimp [prodTriple]
+  calc n * (a i - 1) + b i ≤ n * (a i - 1) + n := Nat.add_le_add_left hbi.2 _
+    _ = n * (a i - 1 + 1) := by ring
+    _ = n * a i := by rw [Nat.sub_add_cancel hai.1]
+    _ ≤ n * m := Nat.mul_le_mul_left n hai.2
+    _ = m * n := Nat.mul_comm n m
+
+private lemma prodTriple_lt₂_right (n : ℕ) (a : Fin 3 → ℕ) {b₁ b₂ : Fin 3 → ℕ}
+    (hb : b₁ <₂ b₂) : prodTriple n a b₁ <₂ prodTriple n a b₂ := by
+  rcases hb with ⟨i, j, hij, hi, hj⟩
+  exact ⟨i, j, hij, Nat.add_lt_add_left hi _, Nat.add_lt_add_left hj _⟩
+
+private lemma prodTriple_lt₂_left {m n : ℕ} {a₁ a₂ b₁ b₂ : Fin 3 → ℕ}
+    (ha₁ : Set.range a₁ ⊆ Set.Icc 1 m)
+    (hb₁ : Set.range b₁ ⊆ Set.Icc 1 n) (hb₂ : Set.range b₂ ⊆ Set.Icc 1 n)
+    (ha : a₁ <₂ a₂) : prodTriple n a₁ b₁ <₂ prodTriple n a₂ b₂ := by
+  have coord_lt {k : Fin 3} (hk : a₁ k < a₂ k) :
+      prodTriple n a₁ b₁ k < prodTriple n a₂ b₂ k := by
+    have ha1k := (Set.mem_Icc.mp (ha₁ ⟨k, rfl⟩)).1
+    have hb1k := (Set.mem_Icc.mp (hb₁ ⟨k, rfl⟩)).2
+    have hb2k := (Set.mem_Icc.mp (hb₂ ⟨k, rfl⟩)).1
+    dsimp [prodTriple]
+    calc n * (a₁ k - 1) + b₁ k ≤ n * (a₁ k - 1) + n := Nat.add_le_add_left hb1k _
+      _ = n * (a₁ k - 1 + 1) := by ring
+      _ = n * a₁ k := by rw [Nat.sub_add_cancel ha1k]
+      _ ≤ n * (a₂ k - 1) := Nat.mul_le_mul_left n (Nat.le_sub_one_of_lt hk)
+      _ < n * (a₂ k - 1) + b₂ k := Nat.lt_add_of_pos_right hb2k
+  rcases ha with ⟨i, j, hij, hi, hj⟩
+  exact ⟨i, j, hij, coord_lt hi, coord_lt hj⟩
+
+private def prodSeq (n : ℕ) : List (Fin 3 → ℕ) → List (Fin 3 → ℕ) → List (Fin 3 → ℕ)
+  | [], _ => []
+  | a :: s, t => t.map (prodTriple n a) ++ prodSeq n s t
+
+private lemma prodSeq_length (n : ℕ) (s t : List (Fin 3 → ℕ)) :
+    (prodSeq n s t).length = s.length * t.length := by
+  induction s with
+  | nil => simp [prodSeq]
+  | cons a s ih =>
+    simp only [prodSeq, List.length_append, List.length_map, List.length_cons, ih]
+    ring
+
+private lemma mem_prodSeq {n : ℕ} {s t : List (Fin 3 → ℕ)} {x : Fin 3 → ℕ} :
+    x ∈ prodSeq n s t ↔ ∃ a ∈ s, ∃ b ∈ t, prodTriple n a b = x := by
+  induction s with
+  | nil => simp [prodSeq]
+  | cons a s ih =>
+    simp only [prodSeq, List.mem_append, List.mem_map, ih, List.mem_cons]
+    constructor
+    · rintro (⟨b, hb, hbx⟩ | ⟨a', ha', b, hb, hbx⟩)
+      · exact ⟨a, Or.inl rfl, b, hb, hbx⟩
+      · exact ⟨a', Or.inr ha', b, hb, hbx⟩
+    · rintro ⟨a', rfl | ha', b, hb, hbx⟩
+      · exact Or.inl ⟨b, hb, hbx⟩
+      · exact Or.inr ⟨a', ha', b, hb, hbx⟩
+
+private lemma prodSeq_isIncreasing₂ {m n : ℕ} {s t : List (Fin 3 → ℕ)}
+    (hs₁ : ∀ a ∈ s, Set.range a ⊆ Set.Icc 1 m) (hs₂ : IsIncreasing₂ s)
+    (ht₁ : ∀ b ∈ t, Set.range b ⊆ Set.Icc 1 n) (ht₂ : IsIncreasing₂ t) :
+    IsIncreasing₂ (prodSeq n s t) := by
+  induction s with
+  | nil => simp [prodSeq]
+  | cons a s ih =>
+    rw [IsIncreasing₂] at hs₂ ⊢
+    rw [List.pairwise_cons] at hs₂
+    rw [prodSeq, List.pairwise_append]
+    refine ⟨?_, ih (fun a' ha' => hs₁ a' (List.mem_cons_of_mem a ha')) hs₂.2, ?_⟩
+    · rw [List.pairwise_map]
+      exact List.Pairwise.imp (fun h => prodTriple_lt₂_right n a h) ht₂
+    · intro x hx y hy
+      rcases List.mem_map.mp hx with ⟨b₁, hb₁, rfl⟩
+      rcases mem_prodSeq.mp hy with ⟨a₂, ha₂, b₂, hb₂, rfl⟩
+      exact prodTriple_lt₂_left (hs₁ a List.mem_cons_self)
+        (ht₁ b₁ hb₁) (ht₁ b₂ hb₂) (hs₂.1 a₂ ha₂)
+
+private lemma maximalLength_mul_ge (m n : ℕ) : F m * F n ≤ F (m * n) := by
+  obtain ⟨s, hs₁, hs₂, hs_len⟩ := exists_list_maximalLength m
+  obtain ⟨t, ht₁, ht₂, ht_len⟩ := exists_list_maximalLength n
+  rw [← hs_len, ← ht_len, ← prodSeq_length n s t, maximalLength]
+  refine le_csSup (bddAbove_maximalLength (m * n)) ⟨prodSeq n s t, ?_, ?_, rfl⟩
+  · intro x hx
+    rcases mem_prodSeq.mp hx with ⟨a, ha, b, hb, rfl⟩
+    exact prodTriple_mem_Icc (hs₁ a ha) (ht₁ b hb)
+  · exact prodSeq_isIncreasing₂ hs₁ hs₂ ht₁ ht₂
+
+private lemma maximalLength_pow_ge (n k : ℕ) : (F n) ^ k ≤ F (n ^ k) := by
+  induction k with
+  | zero => simp [maximalLength_one]
+  | succ k ih =>
+    calc (F n) ^ (k + 1) = (F n) ^ k * F n := by ring
+      _ ≤ F (n ^ k) * F n := Nat.mul_le_mul_right (F n) ih
+      _ ≤ F (n ^ k * n) := maximalLength_mul_ge (n ^ k) n
+      _ = F (n ^ (k + 1)) := by rw [show n ^ k * n = n ^ (k + 1) by ring]
+
+private lemma rpow_pow_le_maximalLength {n : ℕ} {e : ℝ} (h : F n = (n : ℝ) ^ e) (k : ℕ) :
+    ((n ^ k : ℕ) : ℝ) ^ e ≤ F (n ^ k) := by
+  have h_eq : ((n ^ k : ℕ) : ℝ) ^ e = ((F n : ℝ)) ^ k := by
+    rw [Nat.cast_pow, ← Real.rpow_natCast, ← Real.rpow_mul (Nat.cast_nonneg n),
+      mul_comm (k : ℝ) e, Real.rpow_mul (Nat.cast_nonneg n), Real.rpow_natCast, ← h]
+  rw [h_eq, ← Nat.cast_pow]
+  exact Nat.cast_le.mpr (maximalLength_pow_ge n k)
+
+private lemma le_pow_self {n : ℕ} (hn : 1 < n) : ∀ k : ℕ, k ≤ n ^ k
+  | 0 => by simp
+  | k + 1 => by
+    have ih := le_pow_self hn k
+    have hpos : 1 ≤ n ^ k := Nat.one_le_pow k n (by omega)
+    calc k + 1 ≤ n ^ k + n ^ k := by omega
+      _ = n ^ k * 2 := by ring
+      _ ≤ n ^ k * n := Nat.mul_le_mul_left (n ^ k) hn
+      _ = n ^ (k + 1) := by ring
+
+private lemma exists_pow_le_and_lt {n : ℕ} (hn : 1 < n) :
+    ∀ m : ℕ, 1 ≤ m → ∃ k : ℕ, n ^ k ≤ m ∧ m < n ^ (k + 1)
+  | 0, hm => by omega
+  | 1, _ => ⟨0, by simp, by simpa using hn⟩
+  | m + 2, _ => by
+    obtain ⟨k, hk1, hk2⟩ := exists_pow_le_and_lt hn (m + 1) (by omega)
+    rcases lt_or_eq_of_le (Nat.succ_le_of_lt hk2) with hlt | heq
+    · exact ⟨k, by omega, hlt⟩
+    · refine ⟨k + 1, by omega, ?_⟩
+      have hpos : 0 < n ^ (k + 1) := by positivity
+      calc m + 2 = n ^ (k + 1) * 1 := by omega
+        _ < n ^ (k + 1) * n := Nat.mul_lt_mul_of_pos_left hn hpos
+        _ = n ^ (k + 2) := by ring
+
 /-- Suppose that for some $n$ we have $F(n) = n ^ {\alpha}$. Then there are arbitrarily
 large $m$ such that $F(m) \geq m^{\alpha}$. -/
 @[category research solved, AMS 5]
 theorem maximalLength_pow {n : ℕ} {e : ℝ} (hn : 1 < n) (h : F n = (n : ℝ) ^ e) :
     ∃ᶠ m : ℕ in Filter.atTop, (m : ℝ) ^ e ≤ F m := by
-  sorry
+  rw [Filter.frequently_atTop]
+  intro N
+  exact ⟨n ^ N, le_pow_self hn N, rpow_pow_le_maximalLength h N⟩
 
 /-- Moreover, for every $\beta < \alpha$ and all sufficiently large $m$ we have
 $F(m) \geq m^{\beta}$. -/
@@ -286,7 +567,57 @@ $F(m) \geq m^{\beta}$. -/
 theorem maximalLength_pow_eventually {n : ℕ} {e : ℝ} (hn : 1 < n) (h : F n = (n : ℝ) ^ e)
     {b : ℝ} (hb : b < e) :
     ∀ᶠ m : ℕ in Filter.atTop, (m : ℝ) ^ b ≤ F m := by
-  sorry
+  have he_nonneg : 0 ≤ e := by
+    by_contra! he_neg
+    have h1_le_Fn : (1 : ℝ) ≤ (F n : ℝ) := by
+      have : 1 ≤ F n := by
+        rw [← maximalLength_one]
+        exact maximalLength_mono (by omega)
+      exact_mod_cast this
+    have hn_gt1 : (1 : ℝ) < (n : ℝ) := by exact_mod_cast hn
+    have h_lt1 : (n : ℝ) ^ e < 1 := by
+      simpa using Real.rpow_lt_rpow_of_exponent_lt hn_gt1 he_neg
+    linarith [h]
+  have heb_pos : 0 < e - b := sub_pos.mpr hb
+  have hn_pos : 0 < (n : ℝ) := by positivity
+  have hne_pos : 0 < (n : ℝ) ^ e := Real.rpow_pos_of_pos hn_pos e
+  rw [Filter.eventually_atTop]
+  refine ⟨max 1 (Nat.ceil (((n : ℝ) ^ e) ^ (1 / (e - b)))), ?_⟩
+  intro m hm
+  have hm1 : 1 ≤ m := le_trans (le_max_left _ _) hm
+  have hm_pos : 0 < (m : ℝ) := by exact_mod_cast hm1
+  have hm_thresh : ((n : ℝ) ^ e) ^ (1 / (e - b)) ≤ (m : ℝ) := by
+    have : Nat.ceil (((n : ℝ) ^ e) ^ (1 / (e - b))) ≤ m := le_trans (le_max_right _ _) hm
+    exact le_trans (Nat.le_ceil _) (by exact_mod_cast this)
+  have h_ne_le : (n : ℝ) ^ e ≤ (m : ℝ) ^ (e - b) := by
+    calc (n : ℝ) ^ e = ((n : ℝ) ^ e) ^ ((1 / (e - b)) * (e - b)) := by
+          rw [one_div_mul_cancel (ne_of_gt heb_pos), Real.rpow_one]
+      _ = (((n : ℝ) ^ e) ^ (1 / (e - b))) ^ (e - b) :=
+          Real.rpow_mul (le_of_lt hne_pos) _ _
+      _ ≤ (m : ℝ) ^ (e - b) :=
+          Real.rpow_le_rpow (by positivity) hm_thresh (le_of_lt heb_pos)
+  obtain ⟨k, hk_le, hk_lt⟩ := exists_pow_le_and_lt hn m hm1
+  have hm_le_pow : (m : ℝ) ≤ ((n ^ k : ℕ) : ℝ) * (n : ℝ) := by
+    have : m ≤ n ^ k * n := by
+      calc m ≤ n ^ (k + 1) := le_of_lt hk_lt
+        _ = n ^ k * n := by ring
+    exact_mod_cast this
+  have h_mul_ineq : (m : ℝ) ^ b * (n : ℝ) ^ e ≤ (F m : ℝ) * (n : ℝ) ^ e := by
+    calc (m : ℝ) ^ b * (n : ℝ) ^ e ≤ (m : ℝ) ^ b * (m : ℝ) ^ (e - b) :=
+          mul_le_mul_of_nonneg_left h_ne_le (by positivity)
+      _ = (m : ℝ) ^ (b + (e - b)) := (Real.rpow_add hm_pos b (e - b)).symm
+      _ = (m : ℝ) ^ e := by ring_nf
+      _ ≤ (((n ^ k : ℕ) : ℝ) * (n : ℝ)) ^ e :=
+          Real.rpow_le_rpow (by positivity) hm_le_pow he_nonneg
+      _ = ((n ^ k : ℕ) : ℝ) ^ e * (n : ℝ) ^ e :=
+          Real.mul_rpow (by positivity) (by positivity)
+      _ ≤ (F (n ^ k) : ℝ) * (n : ℝ) ^ e :=
+          mul_le_mul_of_nonneg_right (rpow_pow_le_maximalLength h k) (by positivity)
+      _ ≤ (F m : ℝ) * (n : ℝ) ^ e := by
+          have : (F (n ^ k) : ℝ) ≤ (F m : ℝ) :=
+            Nat.cast_le.mpr (maximalLength_mono hk_le)
+          exact mul_le_mul_of_nonneg_right this (by positivity)
+  exact le_of_mul_le_mul_right h_mul_ineq hne_pos
 
 /-- $F(n) \leq n^{3/2}$. -/
 @[category research open, AMS 5]
