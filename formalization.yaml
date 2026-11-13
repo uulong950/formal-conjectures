@@ -1,0 +1,131 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+
+version: "v0.4"
+
+project:
+  name: "Lean Formalization of First Proof Q4 and s-Increasing Tuples"
+  description: >-
+    A Lean 4 formalization of selected results from First Proof
+    (arXiv:2602.05192) and the paper on the length of s-increasing
+    sequences of r-tuples (arXiv:1609.08688). The development includes
+    finite additive convolution degree results, two special cases of
+    an inequality, a square-number lower bound, and two power-growth
+    consequences for maximal lengths of 2-increasing sequences.
+  authors:
+    - name: "Zhang Xiaolong"
+      github: "uulong950"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - name: "Zhang Xiaolong"
+      github: "uulong950"
+
+classification:
+  arxiv:
+    - "math.CO"
+    - "math.RA"
+  msc2020:
+    - "05D10"
+    - "11B75"
+
+sources:
+  - title: "First Proof"
+    id: "https://arxiv.org/abs/2602.05192"
+    type: "article"
+    location: "Question 4"
+    relationship: "formalizes"
+    note: "Formalizes selected finite additive convolution results."
+
+  - title: "The length of an s-increasing sequence of r-tuples"
+    authors:
+      - "W. T. Gowers"
+      - "J. Long"
+    id: "https://arxiv.org/abs/1609.08688"
+    type: "article"
+    relationship: "formalizes"
+    note: "Formalizes selected lower-bound and power-growth results."
+
+status:
+  scope: >-
+    Six declarations are selected by comparator.json. They are proved
+    in the imported Formal Conjectures source modules. Four other
+    theorem declarations in the two relevant source files remain
+    incomplete and are outside the selected Comparator scope.
+  sorry_count: 4
+  sorry_in_definitions: 0
+  axioms:
+    - "propext"
+    - "Classical.choice"
+    - "Quot.sound"
+
+automation:
+  methods:
+    - method: "copilot"
+  models:
+    - "ChatGPT GPT-6"
+  framework: "ChatGPT"
+  tool_setup: >-
+    Human-led Lean 4 formalization with ChatGPT assistance for proof
+    writing, debugging, formal statement development, and axiom audits.
+    Lean 4.33.1, Mathlib, and Lake were used locally.
+  cost:
+    wall_time: "Not tracked"
+    spend_usd: "Subscription-based; project-specific cost not tracked"
+    hardware: "Local Linux development machine"
+  prompting_notes: >-
+    Interactive assistance for Lean proof development, compiler error
+    diagnosis, formalization refinement, and checking theorem axiom
+    dependencies.
+  notes: >-
+    Zhang Xiaolong is responsible for the formalization and used
+    ChatGPT as an interactive proof-development assistant.
+
+fidelity:
+  divergences: >-
+    The six selected statements are intended to correspond to the
+    cited mathematical sources. The Challenge module restates the
+    selected statements and supporting definitions. No independent
+    mathematical equivalence review has yet been completed.
+
+review:
+  status: "self-assessed"
+  reviewers:
+    - "Zhang Xiaolong"
+  notes: >-
+    Challenge.lean and Solution.lean compile locally. The six selected
+    declarations were inspected using Lean's #print axioms and depend
+    only on propext, Classical.choice, and Quot.sound. This is not an
+    independent referee review. Palomar Comparator and NanoDa checks
+    have not yet been completed.
+
+alignment:
+  namespace: "Arxiv.«2602.05192» and Arxiv.«1609.08688»"
+  statements:
+    - source: "First Proof, Question 4: finite additive convolution degree"
+      lean: "Arxiv.«2602.05192».finiteAdditiveConvolution_degree"
+      module: "Solution"
+      status: "proved"
+    - source: "First Proof, Question 4: inequality for n = 2"
+      lean: "Arxiv.«2602.05192».four_2"
+      module: "Solution"
+      status: "proved"
+    - source: "First Proof, Question 4: inequality for n = 3"
+      lean: "Arxiv.«2602.05192».four_3"
+      module: "Solution"
+      status: "proved"
+    - source: "Square-number lower bound for 2-increasing sequences"
+      lean: "Arxiv.«1609.08688».maximalLength_ge_of_isSquare"
+      module: "Solution"
+      status: "proved"
+    - source: "Power-growth consequence"
+      lean: "Arxiv.«1609.08688».maximalLength_pow"
+      module: "Solution"
+      status: "proved"
+    - source: "Eventual power-growth consequence"
+      lean: "Arxiv.«1609.08688».maximalLength_pow_eventually"
+      module: "Solution"
+      status: "proved"
+
+acknowledgements: >-
+  Thanks to the authors of the cited mathematical works, Lean and
+  Mathlib contributors, and the developers of Lake and related
+  formal verification tools.
