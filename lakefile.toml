@@ -30,7 +30,7 @@ weak.linter.style.openClassical = true
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.33.1"
+rev = "v4.35.0-rc2"
 
 # We make this a separate library so that we can apply different lean options.
 [[lean_lib]]
@@ -70,3 +70,9 @@ srcDir = "scripts"
 root = "extract_names"
 exeName = "extract_names"
 supportInterpreter = true
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"

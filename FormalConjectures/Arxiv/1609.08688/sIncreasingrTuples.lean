@@ -15,7 +15,9 @@ limitations under the License.
 -/
 module
 
-public import FormalConjecturesUtil
+public import Mathlib
+public meta import FormalConjecturesUtil.Attributes.Basic
+public import FormalConjecturesForMathlib.Analysis.SpecialFunctions.Log.Basic
 
 /-!
 # The length of an $s$-increasing sequence of $r$-tuples

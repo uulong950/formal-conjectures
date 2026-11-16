@@ -13,7 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -/
-import FormalConjecturesUtil
+module
+
+import Mathlib
+import FormalConjecturesUtil.Linters.StubLinter
+import FormalConjecturesUtil.Linters.NamespaceLinter
 
 /-!
 # Tests for StubLinter

@@ -2,12 +2,12 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "Arxiv.«2602.05192».finiteAdditiveConvolution_degree",
-    "Arxiv.«2602.05192».four_2",
-    "Arxiv.«2602.05192».four_3",
-    "Arxiv.«1609.08688».maximalLength_ge_of_isSquare",
-    "Arxiv.«1609.08688».maximalLength_pow",
-    "Arxiv.«1609.08688».maximalLength_pow_eventually"
+    "Palomar.finiteAdditiveConvolution_degree",
+    "Palomar.four_2",
+    "Palomar.four_3",
+    "Palomar.maximalLength_ge_of_isSquare",
+    "Palomar.maximalLength_pow",
+    "Palomar.maximalLength_pow_eventually"
   ],
   "permitted_axioms": [
     "propext",

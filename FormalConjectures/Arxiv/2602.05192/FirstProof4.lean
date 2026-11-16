@@ -15,7 +15,8 @@ limitations under the License.
 -/
 module
 
-public import FormalConjecturesUtil
+public import Mathlib
+public meta import FormalConjecturesUtil.Attributes.Basic
 
 /-!
 # First Proof, Theorem 4

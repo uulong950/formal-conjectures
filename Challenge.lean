@@ -2,6 +2,8 @@ module
 
 public import Mathlib
 
+@[expose] public section
+
 open Polynomial Finset ENNReal
 open scoped Nat
 
@@ -72,3 +74,39 @@ theorem maximalLength_pow_eventually {n : ℕ} {e : ℝ} (hn : 1 < n)
   sorry
 
 end Arxiv.«1609.08688»
+
+-- Palomar submission entry points
+@[expose] public section
+
+namespace Palomar
+open Polynomial
+open Arxiv.«2602.05192» Arxiv.«1609.08688»
+local notation p " (⊞_"n ")" q:65 => Arxiv.«2602.05192».finiteAdditiveConvolution n p q
+local notation "F" => Arxiv.«1609.08688».maximalLength
+
+theorem finiteAdditiveConvolution_degree (n : ℕ) (p q : ℝ[X])
+    (hp : p.degree = n) (hq : q.degree = n) :
+    (p (⊞_n) q).degree = n := by
+  sorry
+
+theorem four_2 : ∀ (p q : ℝ[X]), FourProp p q 2 := by
+  sorry
+
+theorem four_3 : ∀ (p q : ℝ[X]), FourProp p q 3 := by
+  sorry
+
+theorem maximalLength_ge_of_isSquare {n : ℕ} (h : IsSquare n) :
+    n.sqrt ^ 3 ≤ F n := by
+  sorry
+
+theorem maximalLength_pow {n : ℕ} {e : ℝ} (hn : 1 < n)
+    (h : F n = (n : ℝ) ^ e) :
+    ∃ᶠ m : ℕ in Filter.atTop, (m : ℝ) ^ e ≤ F m := by
+  sorry
+
+theorem maximalLength_pow_eventually {n : ℕ} {e : ℝ} (hn : 1 < n)
+    (h : F n = (n : ℝ) ^ e) {b : ℝ} (hb : b < e) :
+    ∀ᶠ m : ℕ in Filter.atTop, (m : ℝ) ^ b ≤ F m := by
+  sorry
+
+end Palomar
