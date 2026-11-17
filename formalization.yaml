@@ -1,133 +1,204 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
 
-version: "v0.4"
-
+version: v0.4
 project:
-  name: "Lean Formalization of First Proof Q4 and s-Increasing Tuples"
+  name: Lean Formalization of First Proof Q4 and s-Increasing Tuples
   description: >-
-    A Lean 4 formalization of selected results from First Proof
-    (arXiv:2602.05192) and the paper on the length of s-increasing
-    sequences of r-tuples (arXiv:1609.08688). The development includes
-    finite additive convolution degree results, two special cases of
-    an inequality, a square-number lower bound, and two power-growth
-    consequences for maximal lengths of 2-increasing sequences.
+    Six selected Lean 4 proofs: degree preservation for finite additive convolution of arbitrary real
+    degree-n polynomials; the finite free Stam inequality 1/Phi(p boxplus_n q) >= 1/Phi(p) + 1/Phi(q)
+    for monic real-rooted polynomials at n=2 and n=3, including repeated roots; and three Gowers--Long
+    results for the maximum length F(n) of a sequence of triples in {1,...,n}^3 in which every earlier
+    triple is strictly smaller than every later triple in at least two coordinates. The sequence results
+    are F(m^2) >= m^3 for natural m; arbitrarily large M with F(M) >= M^e if n>1 and F(n)=n^e; and
+    F(M) >= M^b for all sufficiently large M for each b<e under the same hypotheses. Proofs use leading
+    coefficients, quadratic root gaps, cubic discriminants and a sum-of-squares identity, and explicit
+    sequence products. The README explains each claim, proof route, source, audience, and relation
+    to prior formalizations, including the registered square lower bound PALOMAR-2026-11-13-000015.
+    The contribution is the specific proof implementation; mathematical priority and first-formalization
+    status are not claimed.
   authors:
-    - name: "Zhang Xiaolong"
-      github: "uulong950"
-  license: "Apache-2.0"
+  - Zhang Xiaolong
+  license: Apache-2.0
   responsible_maintainers:
-    - name: "Zhang Xiaolong"
-      github: "uulong950"
-
+  - Zhang Xiaolong
 classification:
   arxiv:
-    - "math.CO"
-    - "math.RA"
+  - math.CO
+  - math.CA
   msc2020:
-    - "05D10"
-    - "11B75"
-
+  - 05D05
+  - 05D10
+  - 26D15
 sources:
-  - title: "First Proof"
-    id: "https://arxiv.org/abs/2602.05192"
-    type: "article"
-    location: "Question 4"
-    relationship: "formalizes"
-    note: "Formalizes selected finite additive convolution results."
-
-  - title: "The length of an s-increasing sequence of r-tuples"
-    authors:
-      - "W. T. Gowers"
-      - "J. Long"
-    id: "https://arxiv.org/abs/1609.08688"
-    type: "article"
-    relationship: "formalizes"
-    note: "Formalizes selected lower-bound and power-growth results."
-
+- title: First Proof
+  id: https://arxiv.org/abs/2602.05192v2
+  type: paper
+  location: Question 4
+  relationship: formalizes
+  note: >-
+    Source of the convolution and root-functional definitions and the Question 4 statement. The submitted
+    inequality cases have degrees 2 and 3; the degree theorem is a supporting coefficient fact.
+- title: The finite free Stam inequality
+  authors:
+  - Jorge Garza Vargas
+  - Nikhil Srivastava
+  - Zack Stier
+  id: https://arxiv.org/html/2602.05192v2
+  type: paper
+  location: First Proof v2, Appendix B.4, Theorem B.1
+  relationship: formalizes
+  note: >-
+    The general mathematical theorem includes the selected degree-2 and degree-3 inequalities. The
+    fork supplies direct low-degree proofs, without a novelty claim for the inequality or algebraic
+    identities.
+- title: The length of an s-increasing sequence of r-tuples
+  authors:
+  - W. T. Gowers
+  - Jason Long
+  id: https://arxiv.org/abs/1609.08688v2
+  type: paper
+  location: 'Section 1.1: Proposition 1.4 (lower bound), Lemma 1.7, and the immediately following
+    paragraph'
+  relationship: formalizes
+  note: >-
+    The selected results are the square-size construction and two product-amplification consequences
+    for 2-increasing triples. The later main upper-bound and comparable-set results are outside this
+    scope.
 status:
   scope: >-
-    Six declarations are selected by comparator.json. They are proved
-    in the imported Formal Conjectures source modules. Four other
-    theorem declarations in the two relevant source files remain
-    incomplete and are outside the selected Comparator scope.
+    Six declarations are selected by comparator.json. They are proved in the imported Formal Conjectures
+    source modules. Four other theorem declarations in the two relevant source files remain incomplete
+    and are outside the selected Comparator scope.
   sorry_count: 4
   sorry_in_definitions: 0
   axioms:
-    - "propext"
-    - "Classical.choice"
-    - "Quot.sound"
-
+  - propext
+  - Classical.choice
+  - Quot.sound
 automation:
   methods:
-    - method: "copilot"
+  - method: copilot
   models:
-    - "ChatGPT GPT-6"
-  framework: "ChatGPT"
+  - ChatGPT GPT-6
+  framework: ChatGPT
   tool_setup: >-
-    Human-led Lean 4 formalization with ChatGPT assistance for proof
-    writing, debugging, formal statement development, and axiom audits.
-    Lean 4.33.1 was used originally; this submission was migrated to
+    Human-led Lean 4 formalization with ChatGPT assistance for proof writing, debugging, formal statement
+    development, and axiom audits. Lean 4.33.1 was used originally; this submission was migrated to
     Lean 4.35.0-rc2 with matching Mathlib.
   cost:
-    wall_time: "Not tracked"
-    spend_usd: "Subscription-based; project-specific cost not tracked"
-    hardware: "Local Linux development machine"
+    wall_time: Not tracked
+    spend_usd: Subscription-based; project-specific cost not tracked
+    hardware: Local Linux development machine
   prompting_notes: >-
-    Interactive assistance for Lean proof development, compiler error
-    diagnosis, formalization refinement, and checking theorem axiom
-    dependencies.
+    Interactive assistance for Lean proof development, compiler error diagnosis, formalization refinement,
+    and checking theorem axiom dependencies.
   notes: >-
-    Zhang Xiaolong is responsible for the formalization and used
-    ChatGPT as an interactive proof-development assistant.
-
+    Zhang Xiaolong is responsible for the formalization and used ChatGPT as an interactive proof-development
+    assistant. A subsequent documentation and provenance update was prepared with ChatGPT assistance
+    after inspecting the pinned source files and related public formalizations. That update adds no
+    Lean proof code.
 fidelity:
   divergences: >-
-    The six selected statements are intended to correspond to the
-    cited mathematical sources. The Challenge module restates the
-    selected statements and supporting definitions. No independent
-    mathematical equivalence review has yet been completed.
-
+    The six selected statements and their definitions are preserved from the previously mechanically
+    verified snapshot. The README states every condition and conclusion and explains Nat.sqrt, root
+    multiplicities, ENNReal reciprocal conventions, and frequently versus eventually atTop. Source-level
+    comparisons with existing Gowers--Long proofs are documented. No checked Lean bridge to Archon
+    definitions or cross-project proof-equivalence certificate is claimed. Four unfinished declarations
+    in the two substantive files are outside the selected scope.
 review:
-  status: "self-assessed"
+  status: self-assessed
   reviewers:
-    - "Zhang Xiaolong"
+    - Zhang Xiaolong
   notes: >-
-    Challenge.lean, Solution.lean, and the StubLinter test compile locally
-    with Lean 4.35.0-rc2. The command lake comparator --config=comparator.json
-    succeeds locally: the selected declarations match the Challenge,
-    use only the permitted standard axioms, and are accepted by Lean's
-    default kernel. Independent NanoDa and con-ron checks have not been
-    run locally. This is not an independent mathematical referee review.
-
+    Self-assessment and AI-assisted source comparison only. For this documentation
+    revision, local lake build Challenge Solution and lake comparator
+    --config=comparator.json completed successfully using the project's pinned
+    toolchain and six-target Comparator configuration. The fixed earlier snapshot
+    c148b4b061db036a99efa56422b6fb54e0581334 passed Palomar mechanical verification
+    in public run 43814428822. The substantive proof files and dependency pins
+    are preserved. Source inspection of prior projects is not a fresh kernel
+    verification of those projects. No independent human mathematical referee
+    review has been completed.
 alignment:
-  namespace: "Palomar"
+  namespace: Palomar
   statements:
-    - source: "First Proof, Question 4: finite additive convolution degree"
-      lean: "Palomar.finiteAdditiveConvolution_degree"
-      module: "Solution"
-      status: "proved"
-    - source: "First Proof, Question 4: inequality for n = 2"
-      lean: "Palomar.four_2"
-      module: "Solution"
-      status: "proved"
-    - source: "First Proof, Question 4: inequality for n = 3"
-      lean: "Palomar.four_3"
-      module: "Solution"
-      status: "proved"
-    - source: "Square-number lower bound for 2-increasing sequences"
-      lean: "Palomar.maximalLength_ge_of_isSquare"
-      module: "Solution"
-      status: "proved"
-    - source: "Power-growth consequence"
-      lean: "Palomar.maximalLength_pow"
-      module: "Solution"
-      status: "proved"
-    - source: "Eventual power-growth consequence"
-      lean: "Palomar.maximalLength_pow_eventually"
-      module: "Solution"
-      status: "proved"
-
+  - source: 'First Proof, Question 4: finite additive convolution degree'
+    lean: Palomar.finiteAdditiveConvolution_degree
+    module: Solution
+    status: proved
+  - source: 'First Proof, Question 4: inequality for n = 2'
+    lean: Palomar.four_2
+    module: Solution
+    status: proved
+  - source: 'First Proof, Question 4: inequality for n = 3'
+    lean: Palomar.four_3
+    module: Solution
+    status: proved
+  - source: Square-number lower bound for 2-increasing sequences
+    lean: Palomar.maximalLength_ge_of_isSquare
+    module: Solution
+    status: proved
+  - source: Power-growth consequence
+    lean: Palomar.maximalLength_pow
+    module: Solution
+    status: proved
+  - source: Eventual power-growth consequence
+    lean: Palomar.maximalLength_pow_eventually
+    module: Solution
+    status: proved
 acknowledgements: >-
-  Thanks to the authors of the cited mathematical works, Lean and
-  Mathlib contributors, and the developers of Lake and related
-  formal verification tools.
+  Thanks to the authors of the cited mathematical works, Lean and Mathlib contributors, and the developers
+  of Lake and related formal verification tools.
+related_formalizations:
+- id: >-
+    https://github.com/google-deepmind/formal-conjectures/blob/6751c0f043985ac6647db28a45a63afdf21acffe/FormalConjectures/Arxiv/2602.05192/FirstProof4.lean
+  relationship: builds-on
+  note: >-
+    The polynomial definitions and selected theorem types come from Formal Conjectures. The inspected
+    upstream snapshot retains placeholders for these three proofs and links the Archon general Q4
+    development.
+- id: >-
+    https://github.com/google-deepmind/formal-conjectures/blob/6751c0f043985ac6647db28a45a63afdf21acffe/FormalConjectures/Arxiv/1609.08688/sIncreasingrTuples.lean
+  relationship: builds-on
+  note: >-
+    The triple relation, pairwise sequence property, maximal-length definition, selected types, and
+    existing auxiliary facts are inherited from Formal Conjectures. The inspected upstream snapshot
+    links the registered square-bound proof and mentions an earlier proof by weiyangzen.
+- id: https://github.com/frenzymath/Archon-FirstProof-Results/blob/35550f2bc0a58289bbe2342a64f10a46ada0f52f/FirstProof/FirstProof4/Problem4.lean
+  relationship: other
+  note: >-
+    Known general Lean Q4 development. Problem4.harmonic_mean_inequality_full covers monic real-rooted
+    polynomials of every degree n>=2 in its own polyBoxPlus/invPhiN_poly formulation. Its intended
+    mathematical scope includes n=2 and n=3. This fork uses a different convolution definition and
+    ENNReal-valued Phi; no Lean bridge has been checked. The submitted degree-preservation statement
+    also covers arbitrary nonmonic real polynomials, so identical-declaration coverage is not asserted.
+    No Archon proof is imported by the selected targets.
+- id: https://palomar-registry.org/entry.html?id=PALOMAR-2026-11-13-000015&version=1
+  relationship: other
+  note: >-
+    Wentao Li, registered square lower bound. Source at https://github.com/VictorLiwentao/fc-palomar-proofs/blob/9b2a1eeaa6d00172a8e08351ed43b896e21ce950/FCPalomar/GowersLongSquare/Solution.lean.
+    The three core definitions match after ignoring whitespace and comments; the square hypothesis
+    and conclusion match after namespace renaming. This is the same lower-bound result and an existing
+    registration precedent, not a claim of first formalization for this fork. No cross-project Lean
+    equivalence certificate was built in this documentation audit.
+- id: >-
+    https://github.com/weiyangzen/awesome_theorems/blob/32e5f75412a804463a0b0c6fff1362d4ab5275b3/Formalizations/Lean/AwesomeTheorems/Stage5/Theorems/S5_CLM_00003491/Proof.lean
+  relationship: other
+  note: >-
+    Earlier square-bound proof noted by upstream and by Wentao Li. Its terminal theorem states the
+    same bound with the maximal-length definition expanded. The file was inspected at the linked immutable
+    revision; its project was not rebuilt in this audit.
+- id: https://github.com/danielpuri1901/erdos-lean-formalization/blob/c838d73/proofs/triplespow/Solution.lean
+  relationship: other
+  note: >-
+    Daniel Puri: increasing_triples_power explicitly targets the type of Arxiv.1609.08688.maximalLength_pow,
+    with product and power lemmas. The linked revision spelling is retained from the inspected prior-work
+    metadata; it is an abbreviated commit. This file was inspected; no independent project build or
+    axiom audit was run.
+- id: https://github.com/VictorLiwentao/fc-palomar-proofs/blob/9b2a1eeaa6d00172a8e08351ed43b896e21ce950/FCPalomar/GowersLongPow/Solution.lean
+  relationship: other
+  note: >-
+    Wentao Li: an existing proof of maximalLength_pow_eventually using the same three core definitions
+    and the same hypotheses and conclusion after namespace renaming. Its metadata credits Daniel Puri
+    for adapted product-construction code. Registration status for this separate growth package is
+    not asserted.
